@@ -1,0 +1,1253 @@
+﻿自我介绍：
+我是来自***的***，今天多大，13年毕业于***学校，15年开始接触PHP  内蒙古俩年，主要做一些型的网站开发，例如OA，教育类，17年进入北京***公司，在公司期间开发了一个什么项目，并在开的的同时对什么项目维护，我们项目成员是5个，后台这方面从数据库到网站再到服务器，一些维护的功能主要是我在做。会写前端，会MySQL数据库，会Linux服务器。
+
+3-5年的规划?
+本人打算找一个可以让本人稳定下来的公司，让我在技术领域有所作为。
+
+为什么离职？
+因为上个公司目前在开发项目上面基本没有需求了，大部分是在维护，感觉没有学习发展的空间，所以出来了。
+
+一、PHP7新特性？
+1.组合比较符（<=>）
+组合比较符号用于比较俩个表达式。当$a小于、等于或大于$b时，它返回-1/0或1，比较规则延续常规比较规则。对象不能进行比较
+
+2.null合并运算符
+
+例如：$a = isset($_GET['a'])??'none';//存在则返回$_GET['a'],否则返回null
+
+3.变量类型的声明：强制、严格
+
+function sumOfInts(int ...$ints)
+{
+    return array_sum($ints);
+}
+ar_dump(sumOfInts(2, '3', 4.1)); // int(9)
+# 严格模式
+declare(strict_types=1);
+
+function add(int $x, int $y)
+{
+    return $x + $y;
+}
+var_dump(add('2', 3)); // Fatal error: Argument 1 passed to add() must be of the type integer
+
+4.返回值类型声明
+
+在函数定义的后面加上：类型名即可
+如：
+function fun($a):array
+{
+	return $a;
+}
+fun(3);//Fatal error
+
+
+5.匿名类
+//php7以前
+class Logger
+{
+    public function log($msg)
+    {
+        echo $msg;
+    }
+}
+
+$util->setLogger(new Logger());
+
+// php7+
+$util->setLogger(new class {
+    public function log($msg)
+    {
+        echo $msg;
+    }
+});
+
+6.Unicode codepoint 转译语法
+这接受一个以16进制形式的 Unicode codepoint，并打印出一个双引号或heredoc包围的 UTF-8 编码格式的字符串。 可以接受任何有效的 codepoint，并且开头的 0 是可以省略的
+
+
+7.Closure::call闭包绑定 简短干练的暂时绑定一个方法到对象上闭包并调用它。
+class A {private $x = 1;}
+
+// PHP 7 之前版本的代码
+$getXCB = function() {return $this->x;};
+$getX = $getXCB->bindTo(new A, 'A'); // 中间层闭包
+echo $getX();
+
+// PHP 7+ 及更高版本的代码
+$getX = function() {return $this->x;};
+echo $getX->call(new A);
+
+
+
+8.带过滤的unserialize提供更安全的方式解包不可靠的数据。它通过白名单的方式来防止潜在的代码注入、
+
+// 将所有的对象都转换为 __PHP_Incomplete_Class 对象
+$data = unserialize($foo, ["allowed_classes" => false]);
+
+// 将除 MyClass 和 MyClass2 之外的所有对象都转换为 __PHP_Incomplete_Class 对象
+$data = unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
+
+// 默认情况下所有的类都是可接受的，等同于省略第二个参数
+$data = unserialize($foo, ["allowed_classes" => true]);
+
+
+9. IntlChar类
+这个类自身定义了许多静态方法用于操作多字符集的 unicode 字符。需要安装intl拓展
+printf('%x', IntlChar::CODEPOINT_MAX);
+echo IntlChar::charName('@');
+var_dump(IntlChar::ispunct('!'));
+
+
+
+10.预期
+它使得在生产环境中启用断言为零成本，并且提供当断言失败时抛出特定异常的能力。以后可以使用这个这个进行断言测试
+ini_set('assert.exception', 1);
+
+class CustomError extends AssertionError {}
+
+assert(false, new CustomError('Some error message'));
+
+
+
+
+11.命名空间按组导入
+从同一个命名空间下导入的类、函数、常量支持按组一次导入
+#php7以前
+use app\model\A;
+use app\model\B;
+#php7+
+use app\model{A,B}
+
+
+12.生成器支持返回表达式
+
+它允许在生成器函数中通过使用 return 语法来返回一个表达式 （但是不允许返回引用值）， 可以通过调用 Generator::getReturn() 方法来获取生成器的返回值， 但是这个方法只能在生成器完成产生工作以后调用一次。
+$gen = (function() {
+    yield 1;
+    yield 2;
+
+    return 3;
+})();
+
+foreach ($gen as $val) {
+    echo $val, PHP_EOL;
+}
+
+echo $gen->getReturn(), PHP_EOL;
+# output
+//1
+//2
+//3
+
+13.生成器委派
+
+现在，只需在最外层生成其中使用yield from，就可以把一个生成器自动委派给其他的生成器
+function gen()
+{
+    yield 1;
+    yield 2;
+
+    yield from gen2();
+}
+
+function gen2()
+{
+    yield 3;
+    yield 4;
+}
+
+foreach (gen() as $val)
+{
+    echo $val, PHP_EOL;
+}
+
+14.整数除法intdiv
+var_dump(intdiv(10,3))//3
+
+
+15.会话设置
+session_start() 可以加入一个数组覆盖php.ini的配置
+
+session_start([
+    'cache_limiter' => 'private',
+    'read_and_close' => true,
+]);
+
+
+16.preg_replace_callback_array
+可以使用一个关联数组来对每个正则表达式注册回调函数， 正则表达式本身作为关联数组的键， 而对应的回调函数就是关联数组的值
+string preg_replace_callback_array(array $regexesAndCallbacks, string $input);
+$tokenStream = []; // [tokenName, lexeme] pairs
+
+$input = <<<'end'
+$a = 3; // variable initialisation
+end;
+
+// Pre PHP 7 code
+preg_replace_callback(
+    [
+        '~\$[a-z_][a-z\d_]*~i',
+        '~=~',
+        '~[\d]+~',
+        '~;~',
+        '~//.*~'
+    ],
+    function ($match) use (&$tokenStream) {
+        if (strpos($match[0], '$') === 0) {
+            $tokenStream[] = ['T_VARIABLE', $match[0]];
+        } elseif (strpos($match[0], '=') === 0) {
+            $tokenStream[] = ['T_ASSIGN', $match[0]];
+        } elseif (ctype_digit($match[0])) {
+            $tokenStream[] = ['T_NUM', $match[0]];
+        } elseif (strpos($match[0], ';') === 0) {
+            $tokenStream[] = ['T_TERMINATE_STMT', $match[0]];
+        } elseif (strpos($match[0], '//') === 0) {
+            $tokenStream[] = ['T_COMMENT', $match[0]];
+        }
+    },
+    $input
+);
+
+// PHP 7+ code
+preg_replace_callback_array(
+    [
+        '~\$[a-z_][a-z\d_]*~i' => function ($match) use (&$tokenStream) {
+            $tokenStream[] = ['T_VARIABLE', $match[0]];
+        },
+        '~=~' => function ($match) use (&$tokenStream) {
+            $tokenStream[] = ['T_ASSIGN', $match[0]];
+        },
+        '~[\d]+~' => function ($match) use (&$tokenStream) {
+            $tokenStream[] = ['T_NUM', $match[0]];
+        },
+        '~;~' => function ($match) use (&$tokenStream) {
+            $tokenStream[] = ['T_TERMINATE_STMT', $match[0]];
+        },
+        '~//.*~' => function ($match) use (&$tokenStream) {
+            $tokenStream[] = ['T_COMMENT', $match[0]];
+        }
+    ],
+    $input
+);
+
+
+17. 随机数、随机字符函数
+
+string random_bytes(int length);
+int random_int(int min, int max);
+
+18.define 支持定义数组
+#php7+
+define('ALLOWED_IMAGE_EXTENSIONS', ['jpg', 'jpeg', 'gif', 'png']);
+
+
+PHP7.0
+
+PHP7.0新特性
+
+1. 组合比较符 (<=>)
+
+组合比较符号用于比较两个表达式。当$a小于、等于或大于$b时它分别返回-1、0或1，比较规则延续常规比较规则。对象不能进行比较
+
+    var_dump('PHP' <=> 'Node'); // int(1)
+    var_dump(123 <=> 456); // int(-1)
+    var_dump(['a', 'b'] <=> ['a', 'b']); // int(0)
+
+2. null合并运算符
+
+由于日常使用中存在大量同时使用三元表达式和isset操作。使用null合并运算符可以简化操作
+
+    # php7以前
+    if(isset($_GET['a'])) {
+      $a = $_GET['a'];
+    }
+    # php7以前
+    $a = isset($_GET['a']) ? $_GET['a'] : 'none';
+    
+    #PHP 7
+    $a = isset($_GET['a']) ?? 'none';
+    
+
+4. 变量类型声明
+
+变量类型声明有两种模式。一种是强制的，和严格的。允许使用下列类型参数int、string、float、bool
+
+同时不能再使用int、string、float、bool作为类的名字了
+
+    function sumOfInts(int ...$ints)
+    {
+        return array_sum($ints);
+    }
+    ar_dump(sumOfInts(2, '3', 4.1)); // int(9)
+    # 严格模式
+    declare(strict_types=1);
+    
+    function add(int $x, int $y)
+    {
+        return $x + $y;
+    }
+    var_dump(add('2', 3)); // Fatal error: Argument 1 passed to add() must be of the type integer
+
+5. 返回值类型声明
+
+增加了返回类型声明，类似参数类型。这样更方便的控制函数的返回值.在函数定义的后面加上:类型名即可
+
+    function fun(int $a): array
+    {
+      return $a;
+    }
+    fun(3);//Fatal error
+
+6. 匿名类
+
+php7允许new class {} 创建一个匿名的对象。
+
+    //php7以前
+    class Logger
+    {
+        public function log($msg)
+        {
+            echo $msg;
+        }
+    }
+    
+    $util->setLogger(new Logger());
+    
+    // php7+
+    $util->setLogger(new class {
+        public function log($msg)
+        {
+            echo $msg;
+        }
+    });
+
+7. Unicode codepoint 转译语法
+
+这接受一个以16进制形式的 Unicode codepoint，并打印出一个双引号或heredoc包围的 UTF-8 编码格式的字符串。 可以接受任何有效的 codepoint，并且开头的 0 是可以省略的
+
+    echo "\u{aa}";// ª
+    echo "\u{0000aa}";// ª
+    echo "\u{9999}";// 香
+
+8. Closure::call
+
+闭包绑定 简短干练的暂时绑定一个方法到对象上闭包并调用它。
+
+    class A {private $x = 1;}
+    
+    // PHP 7 之前版本的代码
+    $getXCB = function() {return $this->x;};
+    $getX = $getXCB->bindTo(new A, 'A'); // 中间层闭包
+    echo $getX();
+    
+    // PHP 7+ 及更高版本的代码
+    $getX = function() {return $this->x;};
+    echo $getX->call(new A);
+
+9. 带过滤的unserialize
+
+提供更安全的方式解包不可靠的数据。它通过白名单的方式来防止潜在的代码注入
+
+    // 将所有的对象都转换为 __PHP_Incomplete_Class 对象
+    $data = unserialize($foo, ["allowed_classes" => false]);
+    
+    // 将除 MyClass 和 MyClass2 之外的所有对象都转换为 __PHP_Incomplete_Class 对象
+    $data = unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
+    
+    // 默认情况下所有的类都是可接受的，等同于省略第二个参数
+    $data = unserialize($foo, ["allowed_classes" => true]);
+
+10. IntlChar类
+
+这个类自身定义了许多静态方法用于操作多字符集的 unicode 字符。需要安装intl拓展
+
+    printf('%x', IntlChar::CODEPOINT_MAX);
+    echo IntlChar::charName('@');
+    var_dump(IntlChar::ispunct('!'));
+
+11. 预期
+
+它使得在生产环境中启用断言为零成本，并且提供当断言失败时抛出特定异常的能力。以后可以使用这个这个进行断言测试
+
+    ini_set('assert.exception', 1);
+    
+    class CustomError extends AssertionError {}
+    
+    assert(false, new CustomError('Some error message'));
+
+12. 命名空间按组导入
+
+从同一个命名空间下导入的类、函数、常量支持按组一次导入
+
+    #php7以前
+    use app\model\A;
+    use app\model\B;
+    #php7+
+    use app\model{A,B}
+
+13.生成器支持返回表达式
+
+ 它允许在生成器函数中通过使用 return 语法来返回一个表达式 （但是不允许返回引用值）， 可以通过调用 Generator::getReturn() 方法来获取生成器的返回值， 但是这个方法只能在生成器完成产生工作以后调用一次。
+
+    $gen = (function() {
+        yield 1;
+        yield 2;
+    
+        return 3;
+    })();
+    
+    foreach ($gen as $val) {
+        echo $val, PHP_EOL;
+    }
+    
+    echo $gen->getReturn(), PHP_EOL;
+    # output
+    //1
+    //2
+    //3
+
+14.生成器委派
+
+现在，只需在最外层生成其中使用yield from，就可以把一个生成器自动委派给其他的生成器
+
+    function gen()
+    {
+        yield 1;
+        yield 2;
+    
+        yield from gen2();
+    }
+    
+    function gen2()
+    {
+        yield 3;
+        yield 4;
+    }
+    
+    foreach (gen() as $val)
+    {
+        echo $val, PHP_EOL;
+    }
+
+15.整数除法函数intdiv
+
+    var_dump(intdiv(10,3)) //3
+
+16.会话选项设置
+
+session_start() 可以加入一个数组覆盖php.ini的配置
+
+    session_start([
+        'cache_limiter' => 'private',
+        'read_and_close' => true,
+    ]);
+
+17. preg_replace_callback_array
+
+可以使用一个关联数组来对每个正则表达式注册回调函数， 正则表达式本身作为关联数组的键， 而对应的回调函数就是关联数组的值
+
+    string preg_replace_callback_array(array $regexesAndCallbacks, string $input);
+    $tokenStream = []; // [tokenName, lexeme] pairs
+    
+    $input = <<<'end'
+    $a = 3; // variable initialisation
+    end;
+    
+    // Pre PHP 7 code
+    preg_replace_callback(
+        [
+            '~\$[a-z_][a-z\d_]*~i',
+            '~=~',
+            '~[\d]+~',
+            '~;~',
+            '~//.*~'
+        ],
+        function ($match) use (&$tokenStream) {
+            if (strpos($match[0], '$') === 0) {
+                $tokenStream[] = ['T_VARIABLE', $match[0]];
+            } elseif (strpos($match[0], '=') === 0) {
+                $tokenStream[] = ['T_ASSIGN', $match[0]];
+            } elseif (ctype_digit($match[0])) {
+                $tokenStream[] = ['T_NUM', $match[0]];
+            } elseif (strpos($match[0], ';') === 0) {
+                $tokenStream[] = ['T_TERMINATE_STMT', $match[0]];
+            } elseif (strpos($match[0], '//') === 0) {
+                $tokenStream[] = ['T_COMMENT', $match[0]];
+            }
+        },
+        $input
+    );
+    
+    // PHP 7+ code
+    preg_replace_callback_array(
+        [
+            '~\$[a-z_][a-z\d_]*~i' => function ($match) use (&$tokenStream) {
+                $tokenStream[] = ['T_VARIABLE', $match[0]];
+            },
+            '~=~' => function ($match) use (&$tokenStream) {
+                $tokenStream[] = ['T_ASSIGN', $match[0]];
+            },
+            '~[\d]+~' => function ($match) use (&$tokenStream) {
+                $tokenStream[] = ['T_NUM', $match[0]];
+            },
+            '~;~' => function ($match) use (&$tokenStream) {
+                $tokenStream[] = ['T_TERMINATE_STMT', $match[0]];
+            },
+            '~//.*~' => function ($match) use (&$tokenStream) {
+                $tokenStream[] = ['T_COMMENT', $match[0]];
+            }
+        ],
+        $input
+    );
+
+18. 随机数、随机字符函数
+
+    string random_bytes(int length);
+    int random_int(int min, int max);
+
+19. define 支持定义数组
+
+    #php7+
+    define('ALLOWED_IMAGE_EXTENSIONS', ['jpg', 'jpeg', 'gif', 'png']);
+
+PHP7.0 变化
+
+1. 错误和异常处理相关变更
+
+PHP 7 改变了大多数错误的报告方式。不同于传统（PHP 5）的错误报告机制，现在大多数错误被作为 Error 异常抛出。
+
+这也意味着，当发生错误的时候，以前代码中的一些错误处理的代码将无法被触发。 因为在 PHP 7 版本中，已经使用抛出异常的错误处理机制了。 （如果代码中没有捕获 Error 异常，那么会引发致命错误）。set_error_handle不一定接收的是异常，有可能是错误。
+
+ERROR层级结构
+
+    interface Throwable
+        |- Exception implements Throwable
+            |- ...
+        |- Error implements Throwable
+            |- TypeError extends Error
+            |- ParseError extends Error
+            |- AssertionError extends Error
+            |- ArithmeticError extends Error
+                |- DivisionByZeroError extends ArithmeticError
+
+    function handler(Exception $e) { ... }
+    set_exception_handler('handler');
+    
+    // 兼容 PHP 5 和 7
+    function handler($e) { ... }
+    
+    // 仅支持 PHP 7
+    function handler(Throwable $e) { ... }
+
+2. list
+
+list 会按照原来的顺序进行赋值。不再是逆序了
+
+    list($a,$b,$c) = [1,2,3];
+    var_dump($a);//1
+    var_dump($b);//2
+    var_dump($c);//3
+
+list不再支持解开字符串、
+
+3. foreach不再改变内部数组指针
+
+    <?php
+    $array = [0, 1, 2];
+    foreach ($array as &$val) {
+        var_dump(current($array));
+    }
+    ?>
+    #php 5
+    int(1)
+    int(2)
+    bool(false)
+    #php7
+    int(0)
+    int(0)
+    int(0)
+
+4. 十六进制字符串不再被认为是数字
+
+    var_dump("0x123" == "291");
+    #php5
+    true
+    #php7
+    false
+      
+
+5.$HTTP_RAW_POST_DATA 被移
+
+$HTTP_RAW_POST_DATA 被移 使用php://input代替
+
+6. 移除了 ASP 和 script PHP 标签
+
+  开标签                    	闭标签      
+  <%                     	%>       
+  <%=                    	%>       
+  <script language="php">	</script>
+
+PHP7.1
+
+PHP7.1新特性
+
+1. 可为空（Nullable）类型
+
+参数以及返回值的类型现在可以通过在类型前加上一个问号使之允许为空。当启用这个特性时，传入的参数或者函数返回的结果要么是给定的类型，要么是null
+
+    #php5
+    function($a = null){
+      if($a===null) {
+        return null;
+      }
+      return $a;
+    }
+    #php7+
+    function fun() :?string
+    {
+      return null;
+    }
+    
+    function fun1(?$a)
+    {
+      var_dump($a);
+    }
+    fun1(null);//null
+    fun1('1');//1
+    
+
+2. void 类型
+
+返回值声明为 void 类型的方法要么干脆省去 return 语句。对于 void来说，NULL 不是一个合法的返回值。
+
+    function fun() :void
+    {
+      echo "hello world";
+    }
+
+3. 类常量可见性
+
+    class Something
+    {
+        const PUBLIC_CONST_A = 1;
+        public const PUBLIC_CONST_B = 2;
+        protected const PROTECTED_CONST = 3;
+        private const PRIVATE_CONST = 4;
+    }
+
+4. iterable 伪类
+
+这可以被用在参数或者返回值类型中，它代表接受数组或者实现了Traversable接口的对象.
+
+    function iterator(iterable $iter)
+    {
+        foreach ($iter as $val) {
+            //
+        }
+    }
+
+5. 多异常捕获处理
+
+一个catch语句块现在可以通过管道字符(|)来实现多个异常的捕获。 这对于需要同时处理来自不同类的不同异常时很有用
+
+    try {
+        // some code
+    } catch (FirstException | SecondException $e) {
+        // handle first and second exceptions
+    }
+
+6. list支持键名
+
+    $data = [
+        ["id" => 1, "name" => 'Tom'],
+        ["id" => 2, "name" => 'Fred'],
+    ];
+    
+    // list() style
+    list("id" => $id1, "name" => $name1) = $data[0];
+    var_dump($id1);//1
+
+7. 字符串支持负向
+
+    $a= "hello";
+    $a[-2];//l
+
+8. 将callback 转闭包
+
+Closure新增了一个静态方法，用于将callable快速地 转为一个Closure 对象。
+
+    <?php
+    class Test
+    {
+        public function exposeFunction()
+        {
+            return Closure::fromCallable([$this, 'privateFunction']);
+        }
+    
+        private function privateFunction($param)
+        {
+            var_dump($param);
+        }
+    }
+    
+    $privFunc = (new Test)->exposeFunction();
+    $privFunc('some value');
+
+9. http2 服务推送
+
+对http2服务器推送的支持现在已经被加入到 CURL 扩展
+
+PHP7.1变更
+
+1. 传递参数过少时将抛出错误
+
+过去我们传递参数过少 会产生warning。php7.1开始会抛出error
+
+2. 移除了ext/mcrypt拓展
+
+
+
+PHP7.2
+
+PHP7.2新特性
+
+1. 增加新的类型object
+
+    function test(object $obj) : object
+    {
+        return new SplQueue();
+    }
+    
+    test(new StdClass());
+
+2. 通过名称加载扩展
+
+扩展文件不再需要通过文件加载 (Unix下以.so为文件扩展名，在Windows下以 .dll 为文件扩展名) 进行指定。可以在php.ini配置文件进行启用
+
+    ; ini file
+    extension=php-ast
+    zend_extension=opcache
+
+3.允许重写抽象方法
+
+当一个抽象类继承于另外一个抽象类的时候，继承后的抽象类可以重写被继承的抽象类的抽象方法。
+
+    <?php
+    
+    abstract class A
+    {
+        abstract function test(string $s);
+    }
+    abstract class B extends A
+    {
+        // overridden - still maintaining contravariance for parameters and covariance for return
+        abstract function test($s) : int;
+    }
+
+4. 使用Argon2算法生成密码散列
+
+Argon2 已经被加入到密码散列（password hashing） API (这些函数以 password_ 开头), 以下是暴露出来的常量
+
+5. 新增 PDO 字符串扩展类型
+
+当你准备支持多语言字符集，PDO的字符串类型已经扩展支持国际化的字符集。以下是扩展的常量：
+
+- PDO::PARAM_STR_NATL
+- PDO::PARAM_STR_CHAR
+- PDO::ATTR_DEFAULT_STR_PARAM
+
+    $db->quote('über', PDO::PARAM_STR | PDO::PARAM_STR_NATL);
+
+6. 命名分组命名空间支持尾部逗号
+
+    use Foo\Bar\{
+        Foo,
+        Bar,
+        Baz,
+    };
+
+PHP7.2 变更
+
+1. number_format 返回值
+
+    var_dump(number_format(-0.01)); // now outputs string(1) "0" instead of string(2) "-0"
+
+2. get_class()不再允许null。
+
+    var_dump(get_class(null))// warning
+
+4. count 作用在不是 Countable Types 将发生warning
+
+    count(1), // integers are not countable
+
+5. 不带引号的字符串
+
+在之前不带引号的字符串是不存在的全局常量，转化成他们自身的字符串。现在将会产生waring。
+
+    var_dump(HEELLO);
+
+6. __autoload 被废弃
+
+__autoload方法已被废弃
+
+7. each 被废弃
+
+使用此函数遍历时，比普通的 foreach 更慢， 并且给新语法的变化带来实现问题。因此它被废弃了。
+
+8. is_object、gettype修正
+
+is_object 作用在__PHP_Incomplete_Class 将反正 true
+
+gettype作用在闭包在将正确返回resource
+
+9. Convert Numeric Keys in Object/Array Casts
+
+把数组转对象的时候，可以访问到整型键的值。
+
+    // array to object
+    $arr = [0 => 1];
+    $obj = (object)$arr;
+    var_dump(
+        $obj,
+        $obj->{'0'}, // now accessible
+        $obj->{0} // now accessible
+    );
+
+二、字符串处理函数
+strcmp（）比较俩个字符串相似度 相等返回0 大于或者小于返回长的的大于小于的值
+strstr() strchr()搜索字符串第一次在另一个字符串出现并返回剩余部分 设置true返回之前的部分
+strstr("I love Shanghai!","Shanghai"); 
+strrev（）字符串反转
+str_split($str,3)  都是把字符串分割到数组中 按3个字符一组分
+implode（“”，$arr）用空格把数组转成字符串
+strpos（"You love php, I love php too!","php"）//9 返回字符串第一次出现的位置索引
+strrpos() 返回最后一次出现的位置索引
+explode('.',$file)按点分割成数组
+array_pop()弹出数组最后一个值 并返回弹出的值
+
+array_shift()//删除元素的第一个值  并返回删除元素的值
+
+
+max（$arr）返回数组最大值   min（$arr）返回数组最小值
+
+
+sort（）数组从小到大排序  rsort（）数组从大到小排序
+
+array_slice($arr,起始位置,截取长度,保留索引(默认为false))
+
+例题：
+截取文件后缀名？（1.substr+strrchr2.substr+strrpos3.explode+end或array_pop4.pathinfo+extension）
+1.substr(strrchr($file,'.'),1);
+2.substr($file,strrpos($file,'.')+1);
+3.$arr = explode('.',$file); end($arr);或者array_pop();
+4.pathinfo()函数
+<?php
+$path_parts = pathinfo('/www/htdocs/inc/lib.inc.php');
+
+echo $path_parts['dirname'], "\n";
+echo $path_parts['basename'], "\n";
+echo $path_parts['extension'], "\n";  （扩展）
+echo $path_parts['filename'], "\n"; // since PHP 5.2.0
+?>
+以上例程会输出：
+
+/www/htdocs/inc
+lib.inc.php
+php
+lib.inc
+
+例题：交换俩个变量的值
+1.list（$a,$b）= array($b,$a)
+2.$c = $a.'#@'.$b;
+$arr = explode('#@',$c);
+$a = $arr[1];$b = $arr[0];
+3.$a .= $b;
+$b = substr($a,0,(strlen($a)-strlen($b)));
+$a = substr($a,strlen($b));
+
+
+三、数组处理函数
+array_combine():通过合并两个数组来创建一个新数组，其中的一个数组元素为键名，另一个数组元素为键值：
+array_multisort():返回一个升序排列的数组：
+array_filter();用回调函数过滤数组中的单元
+array_combine();通过合并两个数组来创建一个新数组，其中的一个数组元素为键名，另一个数组元素为键值
+array_filp()反转数组中的键值
+<?php
+例题：
+array+array和array_meger区别？
+数组下标为数值时：array+array会把相同键名前一个留下返回，array_meger不做处理
+数组下标为字符时：array+array会把相同键名前一个留下返回，array_meger保留最后一个值
+
+例题：
+对二维数组排序
+$arr  = array(
+		'0' => array(
+				'num1' => 3,
+				'num2' => 27
+			),
+		'1' => array(
+				'num1' => 5,
+				'num2' => 50
+			),
+		'2' => array(
+				'num1' => 4,
+				'num2' => 44
+			),
+		'3' => array(
+				'num1' => 3,
+				'num2' => 78
+			)
+	);
+
+foreach ($arr as $key => $row) {
+	$num1[$key] = $row['num1'];
+	$num2[$key] = $row['num2'];
+}
+var_dump($num1);
+array_multisort($num1,SORT_ASC,$num2,SORT_DESC,$arr);
+print_r($arr);
+//result
+
+例题：
+把一个数组的偶数做键 奇数做值  返回一个新的数组
+function odd($var)  
+{  
+    // returns whether the input integer is odd  
+    return($var & 1);  
+}  
+  
+function even($var)  
+{  
+    // returns whether the input integer is even  
+    return(!($var & 1));  
+}  
+$arr1 = array('name','aaa','birth','1995','latest','5.6.0');
+function demo($arr1)
+{
+	$arreven = array_filter($arr1, "even");
+	$arrodd = array_filter($arr1, "odd");
+	$arr2 = array_combine($arreven, $arrodd);
+	return $arr2;
+}
+var_dump(demo($arr1));
+
+例题：
+数组去重
+1.array_unique()
+2.array_flip(),反转数组的键值  反转俩次就可以去重
+3.array_flip()+array_keys();反转取键的值返回新的数组
+
+
+四、常见的http状态码
+200 成功 301永久重定向 302临时重定向 401未授权 404文件未找到 403禁止 500服务端错误
+
+
+
+五、http协议
+
+（网络层是第三层IP port，传输层是第四层tcp udp，应用层是第七层http）
+1.物理层：建立维护断开连接。
+
+
+2.数据链路层：建立逻辑链接、进行硬件地址寻址、查错校验等功能。
+
+
+3.网络层：进行逻辑地址寻址，实现不同网络之间的路径选择。
+
+IP port端口
+4.传输层：定义传输数据的协议端口，以及流程和查错校验。（TCP/UDP）
+
+
+5.会话层：建立会话，管理会话。
+
+
+6.表示层：数据的表示、安全、压缩。
+
+
+7.应用层：网络服务于用户的最后一个接口。（HTTP/FTP/SMTP接收邮件端口25/SNMP/DNS/TELENT远程登录/
+
+HTTPS/POP3接收邮件端口110/DHCP）
+
+
+
+
+
+
+六、MySQL优化
+1.存储层 引擎选取、字段选取、三范式
+2.设计层 索引 缓存 分区表（逻辑分表物理分区表）
+3.SQL层  使用执行效率高的SQL语句
+4.架构层 MySQL集群  MySQL主从复制
+
+myisam和innodb区别？
+myisam：存储为三个文件，读写快（不排序），表锁，并发不太好，具有压缩机制（压缩不可写）适用于内容管理系统
+innodb：存储为俩个文件，行锁，并发好，支持事务，外键适用于商城  抢购 秒杀
+char和varchar区别？
+
+三范式？
+
+第一范式:确保每列的原子性
+第二范式:在第一范式的基础上更进一层,目标是确保表中的每列都和主键相关
+第三范式:在第二范式的基础上更进一层,目标是确保每列都和主键列直接相关,而不是间接相关
+
+MySQL索引有哪些？什么情况下将失效？
+主键，唯一，复合，全文，前缀
+失效：
+1.多列遵循连续性
+2.or 俩边字段都需要有索引
+3.where name like ‘%aaa%’左固定 左边使用%用不到
+4.字符串查找  需要加上引号  否则使用不到索引
+  
+主键索引和唯一索引区别？
+主键索引一定是唯一索引，唯一索引不一定是主键索引。
+一个表中只能有一个主键索引，可以有多个唯一键索引。
+
+memcache和redis区别？
+答：redis，依赖客户端实现分布式读取。
+memcache本身数据没有冗余机制
+redis 支持快照、aof、依赖快照进程持久化，aof增加可靠性，对性能有所影响
+memecache在并发下用cas保证一致性
+redis支持多种数据类型
+
+
+逻辑分表（partition by key/hash/range/list  前俩者求余、后俩个范围）
+物理分区表：水平、垂直
+
+
+SQL语句的优化？
+1.少用*，用什么取什么
+2.多用limit，分段取
+3.关联查询，代替子查询
+4.应尽量避免在 where 子句中使用!=或<>操作符，否则将引擎放弃使用索引而进行全表扫描。
+5.尽量避免在where子句中使用null值，否则将导致引擎放弃使用索引而进行全表扫描
+6.in 和 not in 也要慎用，否则会导致全表扫描
+7.应尽量避免在 where 子句中对字段进行表达式操作，这将导致引擎放弃使用索引而进行全表扫描
+8.应尽量避免在where子句中对字段进行函数操作，这将导致引擎放弃使用索引而进行全表扫描。
+
+mysql主从复制原理?
+主服务器把数据更改记录到二进制日志，从库将主库的日志复制到自己中继日志中，从库读取中继日志的事件，将其重放到从数据库中。
+
+
+一个表中的数据同步到另一个表中？
+update a,b set a.c1 = b.c1,a.c2=b.c2 where a.id=b.id b.age>50
+update a inner join b on a.id=b.id set a.ci=b.c1,a.c2=b.c2 where b.age>50
+
+
+
+linux  删除大于50m的文件
+find /var/mail -size +50m -exec rm {} \;
+
+
+find 指定文件 -size 指定大小 -exec rm {} \;
+
+
+
+
+如何解决并发？
+并发 = QPS*平均响应时间。
+
+1.确认服务器是否支持当前流量
+2.优化数据库访问服务器的负载过大
+3.防盗链
+4.控制大流量文件下载
+5.集群
+
+PHP类文件自动加载？先包含后加载
+__autoload()7中被废弃了（因为同一个项目只容许出现一次，我们引入别人的sdk如果包含__autoload()就不可以的）
+code
+<?php
+function spl_autoload_register($class){
+    if(file_exists($class.".php")){
+        require_once($class.".php");
+	spl_autoload_register("my_autoload1");
+    }else{
+        die("文件不存在！");
+    }
+}
+
+PHP  ：：作用含义？
+：：范围解析操作符  可以访问静态、 常量、 类中重写的变量和方法  类外调用使用类名
+
+
+static？
+static定义时需要赋值（不赋值为null），内存中只有一份地址，多次调用值累加，关闭浏览器，情况值。
+
+
+问：在php中定义常量时，const和define的区别？
+
+ 
+
+答：使用const使得代码简单易读，const本身就是一个语言结构，而define是一个函数。另外const在编译时要比define快很多。
+
+
+问：在php中定义常量时，const和define的区别？
+
+ 答：使用const使得代码简单易读，const本身就是一个语言结构，而define是一个函数。另外const在编译时要比define快很多。
+
+1、const用于类成员变量的定义，一经定义，不可修改。Define不可以用于类成员变量的定义，可用于全局常量。
+
+2、Const可在类中使用，define不能
+
+3、Const不能再条件语句中定义常量
+const定义的常量时大小写敏感，而define可以通过第三个参数（为true表示大小写不敏感）来指定大小写是否敏感。
+
+
+microtime不加true  返回的是字符串  加上是浮点数
+json_decode加true是返回的数组 不加是对象
+
+
+单点登录  
+1.cookie
+用户登录父应用之后，应用返回一个加密的cookie，当用户访问子应用的时候，携带上这个cookie，授权应用解密cookie并进行校验，校验通过则登录当前用户。
+弊端：cookie不支持跨域、cookie不安全
+请求带上加密的token
+2.通过页面重定向的方式
+父应用提供一个GET方式的登录接口，用户通过子应用重定向连接的方式访问这个接口，如果用户还没有登录，则返回一个的登录页面，用户输入账号密码进行登录。如果用户已经登录了，则生成加密的Token，并且重定向到子应用提供的验证Token的接口，通过解密和校验之后，子应用登录当前用户。
+3.使用独立登录系统
+一般说来，大型应用会把授权的逻辑与用户信息的相关逻辑独立成一个应用，称为用户中心。
+用户中心不处理业务逻辑，只是处理用户信息的管理以及授权给第三方应用。第三方应用需要登录的时候，则把用户的登录请求转发给用户中心进行处理，用户处理完毕返回凭证，第三方应用验证凭证，通过后就登录用户。
+
+作者：JC_Huang
+链接：https://www.jianshu.com/p/613e44d4a464
+來源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+thinkPHP5与laravel区别？
+1.主要区别:(thinkPHP更适合国人的编码习惯)
+2.在Laravel框架里,由于其考虑到了跨站请求伪造, 所以如果使用form表单以post方式进行传值时,如果不再form表单中加入{{csrf_field()}}则会报出TokenMethodnotfound的语法错误;
+3.laravel含有模拟数据的功能
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
