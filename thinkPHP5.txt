@@ -1,0 +1,324 @@
+命名规范：
+目录和文件
+目录使用小写加下滑线
+
+类库函数文件统一使.php为后缀
+类文件名以命名空间定义，命名空间和类库文件所在路径一致
+类文件采用驼峰式命名
+类名和类文件名一致采用驼峰式命名
+
+
+函数和类、属性命名
+函数命名采用小写字母加下划线
+方法命名使用驼峰
+属性的命名使用驼峰
+双下划线作为魔术方法
+
+
+常量和配置
+常量大写字母加下划线方式命名
+配置参数以小写字母和下划线命名
+数据表和字段  小写加下划线
+
+ 
+命名空间默认是APP  可以设置app_namespace参数
+
+
+
+目录结构:
+application 引用目录
+extend 扩展类库目录
+public web部署目录
+runtime应用的运行时目录
+vendor第三方类库名录
+thinkPHP框架系统目录
+
+
+
+tp5生命周期
+入口文件-》引导文件-》注册自动加载-》注册错误和异常机制-》应用初始化-》URL访问检测-》
+-》路由检测-》分发请求-》响应输出-》应用结束
+
+
+
+入口文件定义
+入口文件主要完成：
+
+定义框架路径、项目路径（可选）
+定义系统相关常量（可选）
+载入框架入口文件（必须）
+
+
+
+api友好
+
+数据输出 
+设置'default_return_type'=>'json' 
+返回的数据自动会转化为json格式
+
+路由
+普通路由：
+'url_route_on'  =>  false,关闭路由
+
+混合路由：
+
+'url_route_on'  =>  true,
+'url_route_must'=>  false,
+
+强制路由
+'url_route_on'          =>  true,
+'url_route_must'        =>  true,
+
+
+
+控制器
+前置操作
+['except' => '方法名,方法名']
+表示这些方法不使用前置方法，
+
+['only' => '方法名,方法名']
+表示只有这些方法使用前置方法。
+
+
+空操作是指系统在找不到指定的操作方法的时候，会定位到空操作（_empty）方法来执行
+
+
+
+空控制器的概念是指当系统找不到指定的控制器名称的时候，系统会尝试定位空控制器(Error)
+
+
+
+
+请求信息
+如果要获取当前的请求信息，可以使用\think\Request类，
+
+除了下文中的
+
+$request = Request::instance();
+也可以使用助手函数
+
+$request = request();
+
+$request->param() 获取请求参数 false不过滤数据，true包含上传文件
+dump($request->only(['name']));请求参数：仅包含name
+dump($request->except(['name']));echo '请求参数：排除name';
+
+
+
+输入变量
+通过Request对象完成全局输入变量的检测、获取和安全过滤，支持包括$_GET、$_POST、$_REQUEST、$_SERVER、$_SESSION、$_COOKIE、$_ENV等系统变量，以及文件上传信息。
+可以使用has方法来检测一个变量参数是否设置，如下：
+
+Request::instance()->has('id','get');
+Request::instance()->has('name','post');
+或者使用助手函数
+
+input('?get.id');
+input('?post.name');
+
+
+获取get  Request::instance()->get(); input('get.');
+获取post Request::instance()->post(); input('post.');
+
+session  cookie同理
+
+
+
+如果需要更改请求变量的值，可以通过下面的方式：
+
+// 更改GET变量
+Request::instance()->get(['id'=>10]);
+// 更改POST变量
+Request::instance()->post(['name'=>'thinkphp']);
+尽量避免直接修改$_GET 或者 $_POST数据，同时也不能直接修改param变量，例如下面的操作是无效的：
+
+// 更改请求变量
+Request::instance()->param(['id'=>10]);
+
+
+
+
+
+
+
+获取请求类型
+// 是否为 GET 请求
+if (Request::instance()->isGet()) echo "当前为 GET 请求";
+// 是否为 POST 请求
+if (Request::instance()->isPost()) echo "当前为 POST 请求";
+// 是否为 Ajax 请求
+if (Request::instance()->isAjax()) echo "当前为 Ajax 请求";
+
+
+
+方法注入
+如果你需要在Request请求对象中添加自己的方法，可以使用Request对象的方法注入功能
+// 通过hook方法注入动态方法
+Request::hook('user','getUserInfo');
+
+
+属性注入
+可以动态注入当前Request对象的属性，方法：
+
+// 动态绑定属性
+Request::instance()->bind('user',new User);
+// 或者使用
+Request::instance()->user = new User;
+获取绑定的属性使用下面的方式：
+
+Request::instance()->user;
+如果控制器注入请求对象的话，也可以直接使用
+
+$this->request->user;
+或者使用助手函数：
+
+request()->user;
+
+
+操作方法参数绑定
+
+在方法中参数绑定路由参数
+
+
+
+依赖注入
+ThinkPHP的依赖注入（也称之为控制反转）是一种较为轻量的实现，无需任何的配置，并且主要针对访问控制器进行依赖注入。可以在控制器的构造函数或者操作方法（指访问请求的方法）中类型声明任何（对象类型）依赖，这些依赖会被自动解析并注入到控制器实例或方法中。
+
+
+
+请求缓存：
+可以在路由规则里面定义cache参数开启当前路由规则的请求缓存，例如：
+
+// 定义GET请求路由规则 并设置3600秒的缓存
+Route::get('new/:id','News/read',['cache'=>3600]);
+
+查询
+支持query（查询操作）和execute（写入操作）方法
+
+注意：使用db助手函数默认每次都会重新连接数据库，而使用Db::name或者Db::table方法的话都是单例的。db函数如果需要采用相同的链接，可以传入第三个参数，例如：
+
+db('user',[],false)->where('id',1)->find();
+db('user',[],false)->where('status',1)->select();
+
+查询事件（V5.0.4+）
+从5.0.4+版本开始，增加了数据库的CURD操作事件支持，包括：
+
+事件	描述
+before_select	select查询前回调
+before_find	find查询前回调
+after_insert	insert操作成功后回调
+after_update	update操作成功后回调
+after_delete	delete操作成功后回调
+查询事件仅支持find、select、insert、update和delete方法。
+
+注册事件
+使用下面的方法注册数据库查询事件
+
+Query::event('after_insert','callback');
+Query::event('before_select',function($options,$query){
+    // 事件处理
+    return $result;
+});
+
+
+
+模型
+添加一条数据
+第一种是实例化模型对象后赋值并保存：
+
+$user           = new User;
+$user->name     = 'thinkphp';
+$user->email    = 'thinkphp@qq.com';
+$user->save();
+也可以使用data方法批量赋值：
+
+$user = new User;
+$user->data([
+    'name'  =>  'thinkphp',
+    'email' =>  'thinkphp@qq.com'
+]);
+$user->save();
+或者直接在实例化的时候传入数据
+
+$user = new User([
+    'name'  =>  'thinkphp',
+    'email' =>  'thinkphp@qq.com'
+]);
+$user->save();
+// save方法第二个参数为更新条件
+
+
+助手函数
+model()实例化模型
+
+
+一对一关联
+hasOne('关联模型名','外键名','主键名',['模型别名定义'],'join类型');
+
+一对多关联
+hasMany('关联模型名','外键名','主键名',['模型别名定义']);
+
+
+多对多关联
+belongsToMany('关联模型名','中间表名','外键名','当前模型关联键名',['模型别名定义']);
+
+
+
+
+
+
+
+
+视图
+助手函数
+return view('hello',['name'=>'thinkphp']);
+
+
+模板赋值
+$this->assign方法
+
+
+
+模板输出替换
+
+增加__ROOT__ __STATIC__ __JS__和__CSS__内置替换规则
+
+
+系统变量输出
+普通的模板变量需要首先赋值后才能在模板中输出，但是系统变量则不需要，可以直接在模板中输出，系统变量的输出通常以{$Think 打头，例如：
+
+{$Think.server.script_name} // 输出$_SERVER['SCRIPT_NAME']变量
+{$Think.session.user_id} // 输出$_SESSION['user_id']变量
+{$Think.get.pageNumber} // 输出$_GET['pageNumber']变量
+{$Think.cookie.name}  // 输出$_COOKIE['name']变量
+支持输出 $_SERVER、$_ENV、 $_POST、 $_GET、 $_REQUEST、$_SESSION和 $_COOKIE变量。
+
+
+原生PHP
+{php}echo 'Hello,world!';{/php}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

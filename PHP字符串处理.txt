@@ -1,0 +1,20 @@
+strstr() strchr()搜索字符串第一次在另一个字符串出现并返回剩余部分 设置true返回之前的部分
+strstr("I love Shanghai!","Shanghai"); 
+strrev（）字符串反转
+str_split($str,3)  都是把字符串分割到数组中 按3个字符一组分
+implode（“”，$arr）用空格把数组转成字符串
+strpos（"You love php, I love php too!","php"）//9 返回字符串第一次出现的位置索引
+strrpos() 返回最后一次出现的位置索引
+explode('.',$file)按点分割成数组
+array_pop()弹出数组最后一个值 并返回弹出的值
+
+array_shift()//删除元素的第一个值  并返回删除元素的值
+
+
+max（$arr）返回数组最大值   min（$arr）返回数组最小值
+
+
+sort（）数组从小到大排序  rsort（）数组从大到小排序
+
+array_slice($arr,起始位置,截取长度,保留索引(默认为false))
+

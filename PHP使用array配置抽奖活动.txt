@@ -1,0 +1,152 @@
+http://shanmao.me/webback/php/php-gai-lv-suan-fa-shi-yong-yu-chou-jiang-sui-ji-guang-gao
+
+
+
+
+
+翻板抽奖的实现流程：前端页面提供6个方块，用数字1-6依次表示6个不同的方块，当抽奖者点击6个方块中的某一块时，方块翻转到背面，显示抽奖中奖信息。看似简单的一个操作过程，却包含着WEB技术的很多知识面，所以本文的读者应该熟练掌握jQuery和PHP相关知识。
+
+HTML
+与本站上篇文章使用jQuery+PHP+Mysql实现抽奖程序不同的是，翻板抽奖不提供开始和结束抽奖按钮，抽奖者自己决定选取其中的某一个方块，来完成抽奖的，所以我们在页面中放置6个方块，并且用1-6来表示不同的方块。
+
+ 
+<ul id="prize"> 
+    <li class="red" title="点击抽奖">1</li> 
+    <li class="green" title="点击抽奖">2</li> 
+    <li class="blue" title="点击抽奖">3</li> 
+    <li class="purple" title="点击抽奖">4</li> 
+    <li class="olive" title="点击抽奖">5</li> 
+    <li class="brown" title="点击抽奖">6</li> 
+</ul> 
+<div><a href="#" id="viewother">【翻开其他】</a></div> 
+<div id="data"></div> 
+html结构中，我们使用一个无序列表放置6个不同的方块，每个li中的clas属性表示该方块的颜色，列表下面是一个链接a#viewother，用来完成抽奖后，点击它，翻看其他方块背面的中奖信息，默认是隐藏的。接下来还有一个div#data，它是空的，作用是用来临时存储未抽中的其他奖项数据，具体情况看后面的代码。为了让6个方块并排看起来舒服点，您还需要用CSS来美化下，具体可参照demo，本文中不再贴出css代码。
+
+PHP
+我们先完成后台PHP的流程，PHP的主要工作是负责配置奖项及对应的中奖概率，当前端页面点击翻动某个方块时会想后台PHP发送ajax请求，那么后台PHP根据配置的概率，通过概率算法给出中奖结果，同时将未中奖的奖项信息一并以JSON数据格式发送给前端页面。
+
+先来看概率计算函数
+
+ 
+function get_rand($proArr) { 
+    $result = ''; 
+ 
+    //概率数组的总概率精度 
+    $proSum = array_sum($proArr); 
+ 
+    //概率数组循环 
+    foreach ($proArr as $key => $proCur) { 
+        $randNum = mt_rand(1, $proSum); 
+        if ($randNum <= $proCur) { 
+            $result = $key; 
+            break; 
+        } else { 
+            $proSum -= $proCur; 
+        } 
+    } 
+    unset ($proArr); 
+ 
+    return $result; 
+} 
+上述代码是一段经典的概率算法，$proArr是一个预先设置的数组，假设数组为：array(100,200,300，400)，开始是从1,1000这个概率范围内筛选第一个数是否在他的出现概率范围之内， 如果不在，则将概率空间，也就是k的值减去刚刚的那个数字的概率空间，在本例当中就是减去100，也就是说第二个数是在1，900这个范围内筛选的。这样筛选到最终，总会有一个数满足要求。就相当于去一个箱子里摸东西，第一个不是，第二个不是，第三个还不是，那最后一个一定是。这个算法简单，而且效率非常高，关键是这个算法已在我们以前的项目中有应用，尤其是大数据量的项目中效率非常棒。
+
+接下来我们通过PHP配置奖项。
+
+ 
+$prize_arr = array( 
+    '0' => array('id'=>1,'prize'=>'平板电脑','v'=>1), 
+    '1' => array('id'=>2,'prize'=>'数码相机','v'=>5), 
+    '2' => array('id'=>3,'prize'=>'音箱设备','v'=>10), 
+    '3' => array('id'=>4,'prize'=>'4G优盘','v'=>12), 
+    '4' => array('id'=>5,'prize'=>'10Q币','v'=>22), 
+    '5' => array('id'=>6,'prize'=>'下次没准就能中哦','v'=>50), 
+); 
+中是一个二维数组，记录了所有本次抽奖的奖项信息，其中id表示中奖等级，prize表示奖品，v表示中奖概率。注意其中的v必须为整数，你可以将对应的奖项的v设置成0，即意味着该奖项抽中的几率是0，数组中v的总和（基数），基数越大越能体现概率的准确性。本例中v的总和为100，那么平板电脑对应的中奖概率就是1%，如果v的总和是10000，那中奖概率就是万分之一了。
+
+每次前端页面的请求，PHP循环奖项设置数组，通过概率计算函数get_rand获取抽中的奖项id。将中奖奖品保存在数组$res['yes']中，而剩下的未中奖的信息保存在$res['no']中，最后输出json个数数据给前端页面。
+
+ 
+foreach ($prize_arr as $key => $val) { 
+    $arr[$val['id']] = $val['v']; 
+} 
+ 
+$rid = get_rand($arr); //根据概率获取奖项id 
+ 
+$res['yes'] = $prize_arr[$rid-1]['prize']; //中奖项 
+unset($prize_arr[$rid-1]); //将中奖项从数组中剔除，剩下未中奖项 
+shuffle($prize_arr); //打乱数组顺序 
+for($i=0;$i<count($prize_arr);$i++){ 
+    $pr[] = $prize_arr[$i]['prize']; 
+} 
+$res['no'] = $pr; 
+echo json_encode($res); 
+直接输出中奖信息就得了，为何还要把未中奖的信息也要输出给前端页面呢？请看后面的前端代码。
+
+jQuery
+首先为了实现翻板效果，我们需要预先加载翻动插件及jquery，jqueryui相关插件：
+
+ 
+<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script> 
+<script type="text/javascript" src="js/jquery-ui-1.7.2.custom.min.js"></script> 
+<script type="text/javascript" src="js/jquery.flip.min.js"></script> 
+关于flip插件您可以到其官网：http://lab.smashup.it/flip/了解更多信息。
+
+接下来，我们通过单击页面中的方块，来完成抽奖行为。
+
+ 
+$(function(){ 
+    $("#prize li").each(function(){ 
+        var p = $(this); 
+        var c = $(this).attr('class'); 
+        p.css("background-color",c); 
+        p.click(function(){ 
+            $.getJSON("data.php",function(json){ 
+                var prize = json.yes; //抽中的奖项 
+                p.flip({ 
+                    direction:'rl', //翻动的方向rl：right to left 
+                    content:prize, //翻转后显示的内容即奖品 
+                    color:c,  //背景色 
+                    onEnd: function(){ //翻转结束 
+                        p.css({"font-size":"22px","line-height":"100px"}); 
+                        p.attr("id","r"); //标记中奖方块的id 
+                        $("#viewother").show(); //显示查看其他按钮 
+                        $("#prize li").unbind('click') 
+                        .css("cursor","default").removeAttr("title"); 
+                    } 
+                }); 
+                $("#data").data("nolist",json.no); //保存未中奖信息 
+            }); 
+        }); 
+    }); 
+}); 
+代码中先遍历6个方块，给每个方块初始化不同的背景颜色，单击当前方块后，使用$.getJSON向后台data.php发送ajax请求，请求成功后，调用flip插件实现翻转方块，在获取的中奖信息显示在翻转后的方块上，翻转结束后，标记该中奖方块id，同时冻结方块上的单击事件，即unbind(‘click’)，目的就是让抽奖者只能抽一次，抽完后每个方块不能再翻动了。最后将未抽中的奖项信息通过data()储存在#data中。
+
+其实到这一步抽奖工作已经完成，为了能查看其他方块背面究竟隐藏着什么，我们在抽奖后给出一个可以查看其他方块背面的链接。通过点击该链接，其他5个方块转动，将背面奖项信息显示出来。
+
+ 
+$(function(){ 
+    $("#viewother").click(function(){ 
+        var mydata = $("#data").data("nolist"); //获取数据 
+        var mydata2 = eval(mydata);//通过eval()函数可以将JSON转换成数组 
+              
+        $("#prize li").not($('#r')[0]).each(function(index){ 
+            var pr = $(this); 
+            pr.flip({ 
+                direction:'bt', 
+                color:'lightgrey', 
+                content:mydata2[index], //奖品信息（未抽中） 
+                onEnd:function(){ 
+                    pr.css({"font-size":"22px","line-height":"100px","color":"#333"}); 
+                    $("#viewother").hide(); 
+                } 
+            }); 
+        }); 
+        $("#data").removeData("nolist"); 
+    }); 
+}); 
+当单击#viewother时，获取抽奖时保存的未抽中的奖项数据，并将其转化为数组，翻转5个方块，将奖品信息显示在对应的方块中。最终效果图：
+
+luckly2
+
+为什么我抽不到大奖？
+在很多类似的抽奖活动中，参与者往往抽不到大奖，笔者从程序的角度举个例给你看，假如我是抽奖活动的主办方，我设置了6个奖项，每个奖项不同的中奖概率，假如一等奖是一台高级轿车，可是我设置了其中奖概率为0，这意味着什么？这意味着参与抽奖者无论怎么抽，永远也得不到这台高级轿车。而当主办方每次翻动剩下的方块时，参与者会发现一等奖也许就在刚刚抽奖的方块旁边的一个数字下，都怪自己运气差。真的是运气差吗？其实在参与者翻动那个方块时程序已经决定了中奖项，而翻动查看其他方块看到的奖项只是一个烟雾弹，迷惑了观众和参与者。我想看完这篇文章后，您或许会知道电视节目中的翻板抽奖猫腻了，您也许大概再不会去机选双色球了。
